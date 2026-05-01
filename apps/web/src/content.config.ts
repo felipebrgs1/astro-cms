@@ -1,12 +1,12 @@
 import { defineCollection, z } from "astro:content";
-import { createContentDb } from "@astroweb/db/content-db";
+import { createLocalDb } from "@astroweb/db/local";
 import { getPublishedPosts, getPublishedPages } from "@astroweb/db";
 
 const posts = defineCollection({
   loader: {
     name: "posts-db",
     load: async ({ store }) => {
-      const db = await createContentDb();
+      const db = await createLocalDb();
       const allPosts = await getPublishedPosts(db);
 
       allPosts.forEach((post) => {
@@ -37,7 +37,7 @@ const pages = defineCollection({
   loader: {
     name: "pages-db",
     load: async ({ store }) => {
-      const db = await createContentDb();
+      const db = await createLocalDb();
       const allPages = await getPublishedPages(db);
 
       allPages.forEach((page) => {
