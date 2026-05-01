@@ -1,7 +1,25 @@
 import initSqlJs, { type Database as SqlJsDatabase } from "sql.js";
 import { drizzle } from "drizzle-orm/sql-js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 import * as schema from "./schema";
+
+function findWorkspaceRoot(): string {
+  let dir = process.cwd();
+  for (let i = 0; i < 10; i++) {
+    const pkgPath = resolve(dir, "package.json");
+    if (existsSync(pkgPath)) {
+      const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
+      if (pkg.workspaces) return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return process.cwd();
+}
+
+const DB_PATH = resolve(findWorkspaceRoot(), ".local.db");
 
 export type LocalDatabase = ReturnType<typeof drizzle<typeof schema, SqlJsDatabase>>;
 
@@ -66,10 +84,10 @@ function saveDb(sqlDb: SqlJsDatabase, path: string) {
   writeFileSync(path, Buffer.from(data));
 }
 
-export async function createLocalDb(dbPath?: string): Promise<LocalDatabase> {
+export async function createLocalDb(): Promise<LocalDatabase> {
   if (localDb) return localDb;
 
-  const path = dbPath ?? ".local.db";
+  const path = DB_PATH;
 
   let sqlDb: SqlJsDatabase;
   if (existsSync(path)) {

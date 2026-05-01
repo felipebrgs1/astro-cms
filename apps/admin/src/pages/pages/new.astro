@@ -15,6 +15,7 @@ let contentValue = "";
 
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
+  const action = formData.get("_action");
   title = String(formData.get("title") ?? "");
   slug = String(formData.get("slug") ?? "");
   contentValue = String(formData.get("content") ?? "");
@@ -22,7 +23,8 @@ if (Astro.request.method === "POST") {
   if (!title || !slug || !contentValue) {
     error = "Título, slug e conteúdo são obrigatórios.";
   } else {
-    await createPage(db, { title, slug, content: contentValue, status: "draft" });
+    const status = action === "publish" ? "published" : "draft";
+    await createPage(db, { title, slug, content: contentValue, status });
     return Astro.redirect("/pages");
   }
 }
@@ -53,7 +55,8 @@ if (Astro.request.method === "POST") {
       <MDXPreview />
 
       <div class="flex gap-3">
-        <Button type="submit">Salvar rascunho</Button>
+        <Button type="submit" name="_action" value="publish">Publicar</Button>
+        <Button type="submit" name="_action" value="draft" variant="secondary">Salvar rascunho</Button>
         <a href="/pages">
           <Button variant="ghost" tag="span">Cancelar</Button>
         </a>

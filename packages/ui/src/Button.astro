@@ -5,7 +5,10 @@ export interface Props {
   size?: "sm" | "md" | "lg";
   href?: string;
   type?: "button" | "submit" | "reset";
+  name?: string;
+  value?: string;
   class?: string;
+  [key: string]: any;
 }
 
 const {
@@ -14,6 +17,8 @@ const {
   size = "md",
   href,
   type = "button",
+  name,
+  value,
   class: className = "",
 } = Astro.props;
 
@@ -44,7 +49,7 @@ const classes = `${base} ${variants[variant]} ${sizes[size]} ${className}`;
     <slot />
   </span>
 ) : (
-  <button type={type} class={classes}>
+  <button type={type} name={name} value={value} class={classes}>
     <slot />
   </button>
 )}
