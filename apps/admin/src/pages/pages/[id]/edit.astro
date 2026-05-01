@@ -3,6 +3,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 import { getDb } from "../../../lib/db";
 import { getPageById, updatePage } from "@astroweb/db";
 import { Button, Card, Input } from "@astroweb/ui";
+import MDXPreview from "../../../components/MDXPreview.astro";
 
 const { id } = Astro.params;
 const runtime = Astro.locals.runtime;
@@ -66,6 +67,8 @@ if (Astro.request.method === "POST") {
               class="w-full rounded-lg border border-neutral-200 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:border-neutral-700 dark:bg-neutral-800"
             >{page.content}</textarea>
           </div>
+
+          <MDXPreview />
 
           <div class="flex gap-3">
             <Button type="submit">Salvar</Button>
