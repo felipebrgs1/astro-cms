@@ -5,7 +5,7 @@ import { createPage } from "@astroweb/db";
 import { Button, Card, Input } from "@astroweb/ui";
 
 const runtime = Astro.locals.runtime;
-const db = getDb(runtime);
+const db = await getDb(runtime);
 
 let error = "";
 let title = "";

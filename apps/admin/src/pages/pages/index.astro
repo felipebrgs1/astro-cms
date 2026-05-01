@@ -5,7 +5,7 @@ import { getAllPages, deletePage } from "@astroweb/db";
 import { Button } from "@astroweb/ui";
 
 const runtime = Astro.locals.runtime;
-const db = getDb(runtime);
+const db = await getDb(runtime);
 
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();

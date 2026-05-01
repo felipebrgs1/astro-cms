@@ -5,7 +5,7 @@ const posts = defineCollection({
   loader: {
     name: "posts-db",
     load: async ({ store }) => {
-      const db = createLocalDb();
+      const db = await createLocalDb();
       const allPosts = await getPublishedPosts(db);
 
       allPosts.forEach((post) => {
@@ -36,7 +36,7 @@ const pages = defineCollection({
   loader: {
     name: "pages-db",
     load: async ({ store }) => {
-      const db = createLocalDb();
+      const db = await createLocalDb();
       const allPages = await getPublishedPages(db);
 
       allPages.forEach((page) => {

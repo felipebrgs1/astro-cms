@@ -6,7 +6,7 @@ import { Button, Card, Input } from "@astroweb/ui";
 
 const { id } = Astro.params;
 const runtime = Astro.locals.runtime;
-const db = getDb(runtime);
+const db = await getDb(runtime);
 
 const post = await getPostById(db, Number(id));
 
