@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { settings } from "../schema";
 import type { Database } from "../client";
-import type { LocalDatabase } from "../local";
+import type { LocalDatabase } from "../types-local";
 
 type Db = Database | LocalDatabase;
 

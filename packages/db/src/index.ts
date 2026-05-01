@@ -1,8 +1,7 @@
 export { schema, createDb } from "./client";
 export type { Database } from "./client";
 
-export { createLocalDb } from "./local";
-export type { LocalDatabase } from "./local";
+export type { LocalDatabase } from "./types-local";
 
 export { posts, pages, media, settings } from "./schema";
 export type { Post, Page, Media, Setting } from "./types";

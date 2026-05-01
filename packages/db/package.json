@@ -6,11 +6,14 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./local": "./src/local.ts"
+    "./local": "./src/local.ts",
+    "./content-db": "./src/content-db.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
-    "db:migrate": "drizzle-kit migrate --config drizzle.config.ts"
+    "db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
+    "db:push": "drizzle-kit push --config drizzle.local.config.ts",
+    "seed": "bun run seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.0",
@@ -18,6 +21,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250501.0",
+    "@types/bun": "^1.2.0",
     "drizzle-kit": "^0.31.0"
   }
 }
