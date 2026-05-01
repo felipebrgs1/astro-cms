@@ -1,0 +1,60 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getDb } from "../../lib/db";
+import { createPage } from "@astroweb/db";
+import { Button, Card, Input } from "@astroweb/ui";
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime);
+
+let error = "";
+let title = "";
+let slug = "";
+let contentValue = "";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  title = String(formData.get("title") ?? "");
+  slug = String(formData.get("slug") ?? "");
+  contentValue = String(formData.get("content") ?? "");
+
+  if (!title || !slug || !contentValue) {
+    error = "Título, slug e conteúdo são obrigatórios.";
+  } else {
+    await createPage(db, { title, slug, content: contentValue, status: "draft" });
+    return Astro.redirect("/pages");
+  }
+}
+---
+
+<AdminLayout title="Nova página">
+  <Card class="max-w-2xl">
+    <form method="POST" class="space-y-4">
+      {error && <p class="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">{error}</p>}
+
+      <Input name="title" label="Título" value={title} required />
+
+      <Input name="slug" label="Slug" placeholder="sobre" value={slug} required />
+
+      <div class="space-y-1">
+        <label for="content" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          Conteúdo (MDX) <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          name="content"
+          id="content"
+          rows="16"
+          required
+          class="w-full rounded-lg border border-neutral-200 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:border-neutral-700 dark:bg-neutral-800"
+        >{contentValue}</textarea>
+      </div>
+
+      <div class="flex gap-3">
+        <Button type="submit">Salvar rascunho</Button>
+        <a href="/pages">
+          <Button variant="ghost" tag="span">Cancelar</Button>
+        </a>
+      </div>
+    </form>
+  </Card>
+</AdminLayout>

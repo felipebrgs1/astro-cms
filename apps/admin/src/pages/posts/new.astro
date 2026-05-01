@@ -1,0 +1,74 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getDb } from "../../lib/db";
+import { createPost } from "@astroweb/db";
+import { Button, Card, Input } from "@astroweb/ui";
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime);
+
+let error = "";
+let title = "";
+let slug = "";
+let content = "";
+let excerpt = "";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  title = String(formData.get("title") ?? "");
+  slug = String(formData.get("slug") ?? "");
+  content = String(formData.get("content") ?? "");
+  excerpt = String(formData.get("excerpt") ?? "");
+
+  if (!title || !slug || !content) {
+    error = "Título, slug e conteúdo são obrigatórios.";
+  } else {
+    await createPost(db, { title, slug, content, excerpt, status: "draft" });
+    return Astro.redirect("/posts");
+  }
+}
+---
+
+<AdminLayout title="Novo post">
+  <Card class="max-w-2xl">
+    <form method="POST" class="space-y-4">
+      {error && <p class="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">{error}</p>}
+
+      <Input name="title" label="Título" value={title} required />
+
+      <Input name="slug" label="Slug" placeholder="meu-post" value={slug} required />
+
+      <div class="space-y-1">
+        <label for="content" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          Conteúdo (MDX) <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          name="content"
+          id="content"
+          rows="16"
+          required
+          class="w-full rounded-lg border border-neutral-200 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:border-neutral-700 dark:bg-neutral-800"
+        >{content}</textarea>
+      </div>
+
+      <div class="space-y-1">
+        <label for="excerpt" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          Resumo
+        </label>
+        <textarea
+          name="excerpt"
+          id="excerpt"
+          rows="3"
+          class="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:border-neutral-700 dark:bg-neutral-800"
+        >{excerpt}</textarea>
+      </div>
+
+      <div class="flex gap-3">
+        <Button type="submit">Salvar rascunho</Button>
+        <a href="/posts">
+          <Button variant="ghost" tag="span">Cancelar</Button>
+        </a>
+      </div>
+    </form>
+  </Card>
+</AdminLayout>

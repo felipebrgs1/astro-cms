@@ -1,0 +1,78 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getDb } from "../../lib/db";
+import { getAllPosts, deletePost } from "@astroweb/db";
+import { Button } from "@astroweb/ui";
+
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime);
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("_action");
+  const id = Number(formData.get("id"));
+
+  if (action === "delete" && id) {
+    await deletePost(db, id);
+  }
+  return Astro.redirect("/posts");
+}
+
+const posts = await getAllPosts(db);
+---
+
+<AdminLayout title="Posts">
+  <a slot="actions" href="/posts/new">
+    <Button variant="primary">Novo post</Button>
+  </a>
+
+  {
+    posts.length === 0 ? (
+      <p class="text-neutral-500">Nenhum post criado ainda.</p>
+    ) : (
+      <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-neutral-200 dark:border-neutral-800">
+              <th class="px-4 py-3 text-left font-medium">Título</th>
+              <th class="px-4 py-3 text-left font-medium">Status</th>
+              <th class="px-4 py-3 text-right font-medium">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posts.map((post) => (
+              <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
+                <td class="px-4 py-3">
+                  <a href={`/posts/${post.id}/edit`} class="font-medium hover:underline">
+                    {post.title}
+                  </a>
+                </td>
+                <td class="px-4 py-3">
+                  <span class={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                    post.status === "published"
+                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                      : "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+                  }`}>
+                    {post.status === "published" ? "Publicado" : "Rascunho"}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <a href={`/posts/${post.id}/edit`}>
+                      <Button variant="ghost" size="sm">Editar</Button>
+                    </a>
+                    <form method="POST" onsubmit="return confirm('Deletar este post?')" class="inline">
+                      <input type="hidden" name="id" value={post.id} />
+                      <input type="hidden" name="_action" value="delete" />
+                      <Button variant="danger" size="sm" type="submit">Deletar</Button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+</AdminLayout>

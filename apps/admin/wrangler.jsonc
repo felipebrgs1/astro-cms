@@ -1,0 +1,25 @@
+{
+  "main": "./src/_worker.ts",
+  "name": "cms-admin",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "astroweb-cms",
+      "database_id": "YOUR_D1_DATABASE_ID",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 3 * * 0"]
+  },
+  "vars": {
+    "CLOUDFLARE_API_TOKEN": "",
+    "CLOUDFLARE_ACCOUNT_ID": ""
+  }
+}

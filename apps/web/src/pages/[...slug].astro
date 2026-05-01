@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+
+const { slug } = Astro.params;
+
+const pages = await getCollection("pages");
+const page = pages.find((p) => p.id === slug);
+
+if (!page) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await render(page);
+---
+
+<BaseLayout title={page.data.title}>
+  <article>
+    <h1 class="mb-8 text-3xl font-bold">{page.data.title}</h1>
+    <div class="prose prose-neutral dark:prose-invert max-w-none">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

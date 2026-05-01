@@ -1,0 +1,126 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { getDb } from "../../../lib/db";
+import { getPostById, updatePost, publishPost, unpublishPost } from "@astroweb/db";
+import { Button, Card, Input } from "@astroweb/ui";
+
+const { id } = Astro.params;
+const runtime = Astro.locals.runtime;
+const db = getDb(runtime);
+
+const post = await getPostById(db, Number(id));
+
+if (!post) {
+  return new Response("Post não encontrado", { status: 404 });
+}
+
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("_action");
+
+  if (action === "publish") {
+    await publishPost(db, post.id);
+    return Astro.redirect("/posts");
+  }
+
+  if (action === "unpublish") {
+    await unpublishPost(db, post.id);
+    return Astro.redirect("/posts");
+  }
+
+  const title = String(formData.get("title") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const content = String(formData.get("content") ?? "");
+  const excerpt = String(formData.get("excerpt") ?? "");
+
+  if (!title || !slug || !content) {
+    error = "Título, slug e conteúdo são obrigatórios.";
+  } else {
+    await updatePost(db, post.id, { title, slug, content, excerpt });
+    return Astro.redirect("/posts");
+  }
+}
+---
+
+<AdminLayout title={`Editar: ${post.title}`}>
+  <div class="flex gap-4">
+    <div class="flex-1 max-w-2xl">
+      <Card>
+        <form method="POST" class="space-y-4">
+          {error && <p class="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">{error}</p>}
+
+          <Input name="title" label="Título" value={post.title} required />
+
+          <Input name="slug" label="Slug" value={post.slug} required />
+
+          <div class="space-y-1">
+            <label for="content" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Conteúdo (MDX) <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              name="content"
+              id="content"
+              rows="16"
+              required
+              class="w-full rounded-lg border border-neutral-200 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:border-neutral-700 dark:bg-neutral-800"
+            >{post.content}</textarea>
+          </div>
+
+          <div class="space-y-1">
+            <label for="excerpt" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Resumo
+            </label>
+            <textarea
+              name="excerpt"
+              id="excerpt"
+              rows="3"
+              class="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:border-neutral-700 dark:bg-neutral-800"
+            >{post.excerpt ?? ""}</textarea>
+          </div>
+
+          <div class="flex gap-3">
+            <Button type="submit">Salvar</Button>
+            <a href="/posts">
+              <Button variant="ghost" tag="span">Cancelar</Button>
+            </a>
+          </div>
+        </form>
+      </Card>
+    </div>
+
+    <aside class="w-56 space-y-3">
+      <Card>
+        <p class="mb-2 text-sm font-medium">Status</p>
+        <span class={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+          post.status === "published"
+            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            : "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+        }`}>
+          {post.status === "published" ? "Publicado" : "Rascunho"}
+        </span>
+
+        <div class="mt-3 space-y-2">
+          {post.status === "draft" ? (
+            <form method="POST">
+              <input type="hidden" name="_action" value="publish" />
+              <Button variant="primary" size="sm" type="submit" class="w-full">Publicar</Button>
+            </form>
+          ) : (
+            <form method="POST">
+              <input type="hidden" name="_action" value="unpublish" />
+              <Button variant="secondary" size="sm" type="submit" class="w-full">Despublicar</Button>
+            </form>
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <p class="text-xs text-neutral-500">
+          Slug: <code class="text-neutral-700 dark:text-neutral-300">{post.slug}</code>
+        </p>
+      </Card>
+    </aside>
+  </div>
+</AdminLayout>

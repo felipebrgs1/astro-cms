@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const posts = await getCollection("posts");
+const post = posts.find((p) => p.id === slug);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} description={post.data.excerpt}>
+  <article>
+    <header class="mb-8">
+      <h1 class="mb-2 text-3xl font-bold">{post.data.title}</h1>
+      <div class="flex items-center gap-3 text-sm text-neutral-500">
+        <time>{new Date(post.data.createdAt).toLocaleDateString("pt-BR")}</time>
+        {post.data.author && <span>por {post.data.author}</span>}
+      </div>
+    </header>
+    <div class="prose prose-neutral dark:prose-invert max-w-none">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
